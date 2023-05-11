@@ -1,5 +1,3 @@
-from token import DOT
-from unicodedata import bidirectional
 import torch
 from torch import Tensor
 import torch.nn as nn
@@ -70,7 +68,7 @@ class DecoderBiRNN(nn.Module):
             num_layers=num_layers,
             bidirectional=True,
         )
-        self.out = nn.Linear(self.hidden_size * 2, self.output_size)
+        self.out = nn.Linear(self.hidden_size * 4, self.output_size)
 
     def cal_attention(self, hidden: Tensor, encoder_hiddens: Tensor):
         if self.attention_method == AttentionMethod.DOT_PRODUCT:
@@ -78,37 +76,69 @@ class DecoderBiRNN(nn.Module):
                 energy = torch.bmm(hidden[0], encoder_hiddens.T.repeat(2, 1, 1))
                 attn_weights = F.softmax(energy, dim=-1)
                 attn_output = torch.bmm(attn_weights, encoder_hiddens.repeat(2, 1, 1))
-                concat_output = torch.cat((attn_output[0], hidden[0][0]), 1)
+                concat_output = torch.cat(
+                    (attn_output[0], hidden[0][0], attn_output[1], hidden[0][1]), 1
+                )
             else:  # For BiRNN & BiGRU
                 energy = torch.bmm(hidden, encoder_hiddens.T.repeat(2, 1, 1))
                 attn_weights = F.softmax(energy, dim=-1)
                 attn_output = torch.bmm(attn_weights, encoder_hiddens.repeat(2, 1, 1))
-                concat_output = torch.cat((attn_output[0], hidden[0]), 1)
+                concat_output = torch.cat(
+                    (attn_output[0], hidden[0], attn_output[1], hidden[1]), 1
+                )
 
         elif self.attention_method == AttentionMethod.COSINE_SIMILARITY:
             if self.nn_type == NNType.LSTM:  # For LSTM
                 cosine_similarity = nn.CosineSimilarity(dim=-1)
                 h_n, c_n = hidden
-                h_n_reshaped = h_n.mean(dim=0, keepdim=True)
-                attn_weights = F.softmax(
-                    cosine_similarity(h_n_reshaped, encoder_hiddens), dim=-1
+                # h_n_reshaped = h_n.mean(dim=0, keepdim=True)
+                attn_weights_f = F.softmax(
+                    cosine_similarity(h_n[0].unsqueeze(0), encoder_hiddens), dim=-1
                 )
-                attn_output = torch.bmm(
-                    attn_weights.unsqueeze(0),
-                    encoder_hiddens.unsqueeze(0),
+                attn_output_f = torch.bmm(
+                    attn_weights_f.unsqueeze(0), encoder_hiddens.unsqueeze(0)
                 )
-                concat_output = torch.cat((attn_output[0], h_n_reshaped[0]), 1)
+                attn_weights_b = F.softmax(
+                    cosine_similarity(h_n[1].unsqueeze(0), encoder_hiddens), dim=-1
+                )
+                attn_output_b = torch.bmm(
+                    attn_weights_b.unsqueeze(0), encoder_hiddens.unsqueeze(0)
+                )
+                concat_output = torch.cat(
+                    (
+                        attn_output_f[0],
+                        h_n[0],
+                        attn_output_b[0],
+                        h_n[1],
+                    ),
+                    1,
+                )
 
             else:  # For RNN & GRU
                 cosine_similarity = nn.CosineSimilarity(dim=-1)
-                hidden_reshaped = hidden.mean(dim=0, keepdim=True)
-                attn_weights = F.softmax(
-                    cosine_similarity(hidden_reshaped, encoder_hiddens), dim=-1
+                # hidden_reshaped = hidden.mean(dim=0, keepdim=True)
+                # print(hidden_reshaped.shape)
+                attn_weights_f = F.softmax(
+                    cosine_similarity(hidden[0].unsqueeze(0), encoder_hiddens), dim=-1
                 )
-                attn_output = torch.bmm(
-                    attn_weights.unsqueeze(0), encoder_hiddens.unsqueeze(0)
+                attn_output_f = torch.bmm(
+                    attn_weights_f.unsqueeze(0), encoder_hiddens.unsqueeze(0)
                 )
-                concat_output = torch.cat((attn_output[0], hidden_reshaped[0]), 1)
+                attn_weights_b = F.softmax(
+                    cosine_similarity(hidden[1].unsqueeze(0), encoder_hiddens), dim=-1
+                )
+                attn_output_b = torch.bmm(
+                    attn_weights_b.unsqueeze(0), encoder_hiddens.unsqueeze(0)
+                )
+                concat_output = torch.cat(
+                    (
+                        attn_output_f[0],
+                        hidden[0],
+                        attn_output_b[0],
+                        hidden[1],
+                    ),
+                    1,
+                )
         else:
             if self.nn_type == NNType.LSTM:  # For LSTM
                 energy = torch.bmm(
@@ -116,14 +146,18 @@ class DecoderBiRNN(nn.Module):
                 ) / np.sqrt(self.hidden_size)
                 attn_weights = F.softmax(energy, dim=-1)
                 attn_output = torch.bmm(attn_weights, encoder_hiddens.repeat(2, 1, 1))
-                concat_output = torch.cat((attn_output[0], hidden[0][0]), 1)
+                concat_output = torch.cat(
+                    (attn_output[0], hidden[0][0], attn_output[1], hidden[0][1]), 1
+                )
             else:  # For RNN & GRU
                 energy = torch.bmm(hidden, encoder_hiddens.T.repeat(2, 1, 1)) / np.sqrt(
                     self.hidden_size
                 )
                 attn_weights = F.softmax(energy, dim=-1)
                 attn_output = torch.bmm(attn_weights, encoder_hiddens.repeat(2, 1, 1))
-                concat_output = torch.cat((attn_output[0], hidden[0]), 1)
+                concat_output = torch.cat(
+                    (attn_output[0], hidden[0], attn_output[1], hidden[1]), 1
+                )
         return concat_output
 
     def forward(self, input: nn.Embedding, hidden: Tensor, encoder_hiddens: Tensor):
