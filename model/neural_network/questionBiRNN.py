@@ -37,7 +37,7 @@ class AttentionMethod(Enum):
         return self.value
 
 
-class DecoderBiRNN(nn.Module):
+class QuestionBiRNN(nn.Module):
     def __init__(
         self,
         hidden_size: int,
@@ -53,7 +53,7 @@ class DecoderBiRNN(nn.Module):
             "cosine_similarity",
         ] = "dot_product",
     ):
-        super(DecoderBiRNN, self).__init__()
+        super(QuestionBiRNN, self).__init__()
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.dropout_p = dropout_p

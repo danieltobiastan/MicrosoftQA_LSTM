@@ -1,4 +1,4 @@
 from .encoderRNN import EncoderRNN
-from .encoderBiRNN import EncoderBiRNN
+from .documentBiRNN import DocumentBiRNN
 from .decoderRNN import DecoderRNN
-from .decoderBiRNN import DecoderBiRNN
+from .questionBiRNN import QuestionBiRNN

@@ -23,7 +23,7 @@ NN_MAP: Dict[NNType, Type[Union[nn.RNN, nn.LSTM, nn.GRU]]] = {
 }
 
 
-class EncoderBiRNN(nn.Module):
+class DocumentBiRNN(nn.Module):
     def __init__(
         self,
         hidden_size: int,
@@ -31,7 +31,7 @@ class EncoderBiRNN(nn.Module):
         nn_type: Literal["rnn", "lstm", "gru"] = "rnn",
         num_layers=1,
     ):
-        super(EncoderBiRNN, self).__init__()
+        super(DocumentBiRNN, self).__init__()
         self.hidden_size = hidden_size
         self.embedding = embedding
         self.nn_type = NNType(nn_type)
