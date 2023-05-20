@@ -2,9 +2,9 @@
 Github Repository: https://github.com/danieltobiastan/nlp43/tree/master
 ## Members: 
 - Daniel Tan (22684196)
-- Finn Murphy ()
-- Nicholas Choong ()
-- Tom Walker ()
+- Finn Murphy (2223789)
+- Nicholas Choong (21980614)
+- Tom Walker (21979744)
 
 ## Overview:
 This project aims to create a Question Answering (QA) Model based on data from the Microsoft QA Corpus. For the purposes of this assignment however, we used a reduced dataset, already split into training and test sets that can be found in the zip file submitted, and also on the Github Repository itself as "WikiQA-train.tsv" and "WikiQA-test.tsv".
