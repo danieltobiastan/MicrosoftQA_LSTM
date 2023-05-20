@@ -54,7 +54,13 @@ To run the model, you will need to have the following libraries installed:
 - sklearn
 - torch
 - optuna
+- tabulate
+- seaborn
+- matplotlib
+- gensim
+- spacy
+- en_core_web_sm
 
-The data wrangling model notebook can be found in the repository. To run the notebook, you will need to have the data in the same directory as the notebooks. The data can be found in the zip file submitted, and also on the Github Repository itself as "WikiQA-train.tsv" and "WikiQA-test.tsv". Additionally, the pre-trained models can also found and called in the notebook. This applies for both the preprocessing tools like CBOW and POS, and the  Bi-LSTM models. 
+The data wrangling model notebook can be found in the repository. To run the notebook, you will need to have the data in the same directory as the notebooks. The data can be found in the zip file submitted, and also on the Github Repository itself as "WikiQA-train.tsv" and "WikiQA-test.tsv". Additionally, the pre-trained models can also found and called in the notebook. This applies for both the preprocessing tools like CBOW and the Bi-LSTM models. 
 
 **Important Note: Please ensure that there is an additional directory called "<i>cleaneddata</i>" in your working directory to store the processed data in your directory in case the kernel dies**
